@@ -15,8 +15,7 @@ public class PortListener implements SerialPortEventListener {
 		this.port = sport;
 	}
 	
-	
-	
+
 	@Override
 	public void serialEvent(SerialPortEvent event) {
 		if (event.isRXCHAR() ) {

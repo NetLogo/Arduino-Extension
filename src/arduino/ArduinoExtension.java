@@ -27,7 +27,7 @@ public class ArduinoExtension extends DefaultClassManager {
 	
 	static public HashMap<String,Double> values = new HashMap<String,Double>();
 	static {
-		values.put("BaudRate", (double) 9600);
+		values.put("BaudRate", (double) BAUD_RATE);
 		values.put("awesomeness-factor", 11.0);
 	}
 	static public double get(String key) {
@@ -91,6 +91,7 @@ public class ArduinoExtension extends DefaultClassManager {
 			} catch (SerialPortException e) {
 				throw new ExtensionException("Error in opening port: " + e.getMessage());
 			}
+			
 		}
 		
 	}
@@ -104,12 +105,7 @@ public class ArduinoExtension extends DefaultClassManager {
 		@Override
 		public Object report(Argument[] args, Context ctxt)
 				throws ExtensionException, LogoException {
-			
-			if (portListener == null) {
-				throw new ExtensionException("No port is open");
-			} else {
-				return get(args[0].getString());
-			}
+			return get(args[0].getString());
 		}
 	}
 	
@@ -177,6 +173,7 @@ public class ArduinoExtension extends DefaultClassManager {
 	
 	@Override
 	public void unload() {
+		//first remove the event listener (if any) and close the port
 		if (portListener != null) {
 			try {
 				if (serialPort != null ) {
@@ -195,6 +192,8 @@ public class ArduinoExtension extends DefaultClassManager {
 				}
 			}
 		}
+		//now unload the native library, so that if we're loading the extension
+		//again on the same NetLogo run, it doesn't cause us troubles.
 		try
 		{
 			ClassLoader classLoader = this.getClass().getClassLoader() ;
