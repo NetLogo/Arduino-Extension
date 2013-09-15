@@ -42,6 +42,7 @@ public class ArduinoExtension extends DefaultClassManager {
 	public void load(PrimitiveManager pm) throws ExtensionException {
 		pm.addPrimitive("ports", new Ports() );
 		pm.addPrimitive("open", new Open() );
+		pm.addPrimitive("close", new Close() );
 		pm.addPrimitive("get", new Get() );
 		pm.addPrimitive("write-string", new WriteString() );
 		pm.addPrimitive("write-int", new WriteInt() );
@@ -80,21 +81,45 @@ public class ArduinoExtension extends DefaultClassManager {
 		public void perform(Argument[] args, Context ctxt)
 				throws ExtensionException, LogoException {
 
-			try {
-				serialPort = new SerialPort(args[0].getString());
-				serialPort.openPort();
-				serialPort.setParams(BAUD_RATE, 8, 1, 0);
-	            int mask = SerialPort.MASK_RXCHAR + SerialPort.MASK_CTS + SerialPort.MASK_DSR;//Prepare mask
-	            serialPort.setEventsMask(mask); //Set mask
-				portListener = new PortListener( serialPort );
-				serialPort.addEventListener(portListener);
-			} catch (SerialPortException e) {
-				throw new ExtensionException("Error in opening port: " + e.getMessage());
+			if ( serialPort != null && serialPort.isOpened() ) {
+				throw new ExtensionException("Port is already open");
+			} else {
+				try {
+					serialPort = new SerialPort(args[0].getString());
+					serialPort.openPort();
+					serialPort.setParams(BAUD_RATE, 8, 1, 0);
+		            int mask = SerialPort.MASK_RXCHAR + SerialPort.MASK_CTS + SerialPort.MASK_DSR;//Prepare mask
+		            serialPort.setEventsMask(mask); //Set mask
+					portListener = new PortListener( serialPort );
+					serialPort.addEventListener(portListener);
+				} catch (SerialPortException e) {
+					throw new ExtensionException("Error in opening port: " + e.getMessage());
+				}
 			}
-			
 		}
-		
 	}
+	
+	public static void doClose() throws ExtensionException {
+		try {
+			serialPort.removeEventListener();
+			serialPort.closePort();
+		} catch (SerialPortException e) {
+			throw new ExtensionException( "Error in writing: " + e.getMessage() );
+		}
+	}
+	
+	public static class Close extends DefaultCommand {
+		@Override
+		public void perform(Argument[] args, Context ctxt)
+				throws ExtensionException, LogoException {
+			if ( (serialPort == null) || (!serialPort.isOpened()) ) {
+				throw new ExtensionException( "Serial Port not Open");
+			} else {
+				doClose();
+			}
+		}
+	}
+	
 	
 	public static class Get extends DefaultReporter {
 		@Override
@@ -174,14 +199,16 @@ public class ArduinoExtension extends DefaultClassManager {
 	@Override
 	public void unload() {
 		//first remove the event listener (if any) and close the port
-		if (portListener != null) {
+		if (portListener != null && serialPort != null) {
 			try {
-				if (serialPort != null ) {
-					serialPort.removeEventListener();
-					serialPort.closePort();
-				}
+				serialPort.removeEventListener();
 			} catch (SerialPortException e) {
 				e.printStackTrace();
+			}
+			try {
+				serialPort.closePort();
+			} catch (SerialPortException e2) {
+				e2.printStackTrace();
 			}
 		} else {
 			if (serialPort != null && serialPort.isOpened()) {
