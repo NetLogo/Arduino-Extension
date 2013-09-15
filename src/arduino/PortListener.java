@@ -23,15 +23,20 @@ public class PortListener implements SerialPortEventListener {
 				residue += port.readString();
 				int spoint = residue.indexOf(';');
 				
+				//get rid of any leading semicolons
 				while (spoint == 0 ) { 
 					residue = residue.substring(1); 
 					spoint = residue.indexOf(';'); 
 				}
-				
-				while (spoint > 0 && spoint < residue.length() - 1) {
+				//harvest all complete messages (ending in a semicolon).
+				while (spoint > 0 && spoint < residue.length() ) {
 					String head = residue.substring(0, spoint);
 					parse(head);
-					residue = residue.substring(spoint+1);
+					if ( spoint == residue.length() - 1) {
+						residue = "";
+					} else {
+						residue = residue.substring(spoint+1);
+					}
 					spoint = residue.indexOf(';');
 				}
 				
