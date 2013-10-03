@@ -15,7 +15,6 @@ import org.nlogo.api.DefaultReporter;
 import org.nlogo.api.ExtensionException;
 import org.nlogo.api.ExtensionManager;
 import org.nlogo.api.LogoException;
-import org.nlogo.api.LogoList;
 import org.nlogo.api.LogoListBuilder;
 import org.nlogo.api.PrimitiveManager;
 import org.nlogo.api.Syntax;
@@ -33,8 +32,9 @@ public class ArduinoExtension extends DefaultClassManager {
 	}
 	
 	static public double get(String key) {
-		if ( values.containsKey( key ) )  {
-			return values.get(key);
+		String lcKey = key.toLowerCase();
+		if ( values.containsKey( lcKey ) )  {
+			return values.get(lcKey);
 		} else {
 			return Double.NaN;
 		}
@@ -67,7 +67,7 @@ public class ArduinoExtension extends DefaultClassManager {
 			
 			LogoListBuilder llist = new LogoListBuilder();
 			String[] prims = {"reporter:primitives", "reporter:ports", 
-					"reporter:get[Name:String]", "reporter:is-open?",
+					"reporter:get[Name:String(case-insensitive)]", "reporter:is-open?",
 					"",
 					"command:open[Port:String]", "command:close", 
 					"command:write-string[Message:String]",

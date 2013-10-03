@@ -51,9 +51,10 @@ public class PortListener implements SerialPortEventListener {
 		String[] pair = entry.split(",");
 		if ( pair.length == 2 ) {
 			String key = pair[0];
+			String lcKey = key.toLowerCase();
 			try {
 				double val = Double.parseDouble(pair[1]);
-				ArduinoExtension.values.put(key,val);
+				ArduinoExtension.values.put(lcKey,val);
 			} 
 			catch (Exception e) {
 				e.printStackTrace();
