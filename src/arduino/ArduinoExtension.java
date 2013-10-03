@@ -47,6 +47,7 @@ public class ArduinoExtension extends DefaultClassManager {
 		pm.addPrimitive("write-string", new WriteString() );
 		pm.addPrimitive("write-int", new WriteInt() );
 		pm.addPrimitive("write-byte", new WriteByte() );
+		pm.addPrimitive("is-open?", new IsOpen());
 	}
 	
 	
@@ -98,6 +99,16 @@ public class ArduinoExtension extends DefaultClassManager {
 			}
 		}
 	}
+	
+	
+	public static class IsOpen extends DefaultReporter {
+		@Override
+		public Object report(Argument[] arg0, Context arg1)
+				throws ExtensionException, LogoException {
+			return (serialPort != null && serialPort.isOpened() && portListener != null);
+		}
+	}
+	
 	
 	public static void doClose() throws ExtensionException {
 		try {
