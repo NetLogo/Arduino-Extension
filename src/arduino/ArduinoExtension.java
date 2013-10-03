@@ -13,8 +13,10 @@ import org.nlogo.api.DefaultClassManager;
 import org.nlogo.api.DefaultCommand;
 import org.nlogo.api.DefaultReporter;
 import org.nlogo.api.ExtensionException;
+import org.nlogo.api.ExtensionManager;
 import org.nlogo.api.LogoException;
 import org.nlogo.api.LogoList;
+import org.nlogo.api.LogoListBuilder;
 import org.nlogo.api.PrimitiveManager;
 import org.nlogo.api.Syntax;
 
@@ -28,8 +30,8 @@ public class ArduinoExtension extends DefaultClassManager {
 	static public HashMap<String,Double> values = new HashMap<String,Double>();
 	static {
 		values.put("BaudRate", (double) BAUD_RATE);
-		values.put("awesomeness-factor", 11.0);
 	}
+	
 	static public double get(String key) {
 		if ( values.containsKey( key ) )  {
 			return values.get(key);
@@ -40,6 +42,7 @@ public class ArduinoExtension extends DefaultClassManager {
 	
 	@Override
 	public void load(PrimitiveManager pm) throws ExtensionException {
+		pm.addPrimitive("primitives", new Primitives());
 		pm.addPrimitive("ports", new Ports() );
 		pm.addPrimitive("open", new Open() );
 		pm.addPrimitive("close", new Close() );
@@ -52,22 +55,49 @@ public class ArduinoExtension extends DefaultClassManager {
 	
 	
 	
-	public static class Ports extends DefaultReporter {
+	public static class Primitives extends DefaultReporter {
 		@Override
 		public Syntax getSyntax() {
-	      return Syntax.reporterSyntax(Syntax.TYPE_LIST);
+	      return Syntax.reporterSyntax(Syntax.ListType());
 	    }
 		
 		@Override
 		public Object report(Argument[] arg0, Context arg1)
 				throws ExtensionException, LogoException {
 			
-			LogoList llist = new LogoList();
+			LogoListBuilder llist = new LogoListBuilder();
+			String[] prims = {"reporter:primitives", "reporter:ports", 
+					"reporter:get[Name:String]", "reporter:is-open?",
+					"",
+					"command:open[Port:String]", "command:close", 
+					"command:write-string[Message:String]",
+					"command:write-int[Message:int]", 
+					"command:write-byte[Message:byte]",
+					"",
+					"ALSO NOTE: Baud Rate of 9600 is expected"};
+			for (String prim : prims ) {
+				llist.add(prim);
+			}
+			return llist.toLogoList();
+		}
+	}
+	
+	public static class Ports extends DefaultReporter {
+		@Override
+		public Syntax getSyntax() {
+	      return Syntax.reporterSyntax(Syntax.ListType());
+	    }
+		
+		@Override
+		public Object report(Argument[] arg0, Context arg1)
+				throws ExtensionException, LogoException {
+			
+			LogoListBuilder llist = new LogoListBuilder();
 			String[] names = jssc.SerialPortList.getPortNames();
 			for (String name : names ) {
 				llist.add(name);
 			}
-			return llist;
+			return llist.toLogoList();
 		}
 	}
 	
@@ -76,7 +106,7 @@ public class ArduinoExtension extends DefaultClassManager {
 
 		@Override
 		public Syntax getSyntax() {
-			return Syntax.commandSyntax(new int[] {Syntax.TYPE_STRING });
+			return Syntax.commandSyntax(new int[] {Syntax.StringType() });
 		}
 		@Override
 		public void perform(Argument[] args, Context ctxt)
@@ -135,7 +165,7 @@ public class ArduinoExtension extends DefaultClassManager {
 	public static class Get extends DefaultReporter {
 		@Override
 		public Syntax getSyntax() {
-	      return Syntax.reporterSyntax(new int[] {Syntax.TYPE_STRING}, Syntax.TYPE_NUMBER);
+	      return Syntax.reporterSyntax(new int[] {Syntax.StringType()}, Syntax.NumberType());
 	    }
 		
 		@Override
@@ -148,7 +178,7 @@ public class ArduinoExtension extends DefaultClassManager {
 	public static class WriteString extends DefaultCommand {
 		@Override
 		public Syntax getSyntax() {
-			return Syntax.commandSyntax(new int[] {Syntax.TYPE_STRING });
+			return Syntax.commandSyntax(new int[] {Syntax.StringType() });
 		}
 		@Override
 		public void perform(Argument[] args, Context ctxt)
@@ -167,7 +197,7 @@ public class ArduinoExtension extends DefaultClassManager {
 	public static class WriteInt extends DefaultCommand {
 		@Override
 		public Syntax getSyntax() {
-			return Syntax.commandSyntax(new int[] {Syntax.TYPE_NUMBER });
+			return Syntax.commandSyntax(new int[] {Syntax.NumberType() });
 		}
 		@Override
 		public void perform(Argument[] args, Context ctxt)
@@ -186,7 +216,7 @@ public class ArduinoExtension extends DefaultClassManager {
 	public static class WriteByte extends DefaultCommand {
 		@Override
 		public Syntax getSyntax() {
-			return Syntax.commandSyntax(new int[] {Syntax.TYPE_NUMBER });
+			return Syntax.commandSyntax(new int[] {Syntax.NumberType() });
 		}
 		@Override
 		public void perform(Argument[] args, Context ctxt)
@@ -208,7 +238,7 @@ public class ArduinoExtension extends DefaultClassManager {
 	
 	
 	@Override
-	public void unload() {
+	public void unload( ExtensionManager em) {
 		//first remove the event listener (if any) and close the port
 		if (portListener != null && serialPort != null) {
 			try {
