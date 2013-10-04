@@ -31,6 +31,7 @@ If you choose to try to simulate a synchronous, BLOCKING READ communications pat
 you are likely to be 'off by one' respone.  That is, if you do the following in NetLogo code:
 
 arduino:write-byte b
+
 show arduino:read "varname"
 
 You are likely to get the value of "varname" from the PRIOR command represented by writing the byte b.  
