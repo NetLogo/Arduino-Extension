@@ -28,32 +28,33 @@ For a first use without compiling code, do the following:
 
 
 NOTES:
-A NetLogo model using this extension must work in conjunction with an Arduino Sketch.  These two endpoints communicate by way of an application protocol that they define.  For example, if the NetLogo model sends a byte '1' over the wire this may mean something to the Arduino Sketch, which will respond accordingly.  The Arduino Sketch for its own partmay send name-value pairs over the serial port, which then can be looked up asynchronously by the NetLogo model.
+A NetLogo model using this extension must work in conjunction with an Arduino Sketch.  These two endpoints communicate by way of an application protocol that they define.  For example, if the NetLogo model sends a byte '1' over the wire this may mean something to the Arduino Sketch, which will respond accordingly.  The Arduino Sketch for its own part may send name-value pairs over the serial port, which then can be looked up asynchronously by the NetLogo model.
 
 The modeler is free to build as simple or as complex an application protocol on top of this raw communication mechanism.
 
-The asynchronous nature of the board-to-computer communications has one notable limitation.  
-If you choose to try to simulate a synchronous, BLOCKING READ communications pattern,
-(by sending a byte-based signal to the board, which triggers a response in a known name-value pair), then
-you are likely to be 'off by one' respone.  That is, if you do the following in NetLogo code:
+The asynchronous nature of the board-to-computer communications has one notable limitation.  If you choose to try to simulate a synchronous, BLOCKING READ communications pattern, (e.g., by sending a byte-based signal to the board, which triggers a response in a known name-value pair), then you are likely to be 'off by one' respone.  That is, if you do the following in NetLogo code:
+
 
 arduino:write-byte b
-
 show arduino:read "varname"
 
-You are likely to get the value of "varname" from the PRIOR command represented by writing the byte b.  
-This is because the second line of NetLogo code will execute while the Arduino is off generating a new value for "varname".
 
-There are ways of getting around this (simulating a blocking interface by polling on a value to indicate fresh "news" on "varname")
-But this extension works best in settings where the Arduino Sketch is "chatty" and the NetLogo model samples this stream when it needs data.
+You are likely to get the value of "varname" from the PRIOR command represented by writing the byte b.  This is because the second line of NetLogo code will execute while the Arduino is off generating a new value for "varname".
+
+There are ways of getting around this (simulating a blocking interface by polling on a value to indicate fresh "news" on "varname"). But this extension works best in settings where the Arduino Sketch is "chatty" and the NetLogo model samples this stream when it needs data.
 
 
 FUTURE IMPROVEMENTS:
-Because I anticipate that most situations will use chatty Arduino sketches, there is an opportunity to support
-data smoothing.  This is not in place at the moment, but it should be an easy addition.
+Because I anticipate that most situations will use chatty Arduino sketches, there is an opportunity to support data smoothing.  This is not in place at the moment, but it should be an easy addition.
+
+Also, the primitive arduino:is-open?  can be misleading.  Its return indicates whether the port is open (from the computer's perspective) and whether it has not been closed explicitly.  If you pull the arduino, this will not be detected (at least not immediately).  So, a future improvement would be to do a more elaborate PING that confirmed that communications were in fact occurring.  However, this would impose constraints & requirements on the arduino sketch, which I did not want to do.  Suggestions are welcome....
+
 
 
 QUESTIONS:
 If you run into problems or have questions about the extension, please email me: cbrady@inquirelearning.com
+I have tested early versions of this code on Windows, all versions on Mac.  And I WANT it to work across Mac, Win, and Linux.  So if you have troubles, please let me know.
+
+
 
 
