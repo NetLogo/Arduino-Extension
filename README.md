@@ -48,7 +48,7 @@ There are ways of getting around this (simulating a blocking interface by pollin
 FUTURE IMPROVEMENTS:
 Because I anticipate that most situations will use chatty Arduino sketches, there is an opportunity to support data smoothing.  This is not in place at the moment, but it should be an easy addition.
 
-Also, the primitive arduino:is-open?  can be misleading.  Its return indicates whether the port is open (from the computer's perspective) and whether it has not been closed explicitly.  If you pull the arduino, this will not be detected (at least not immediately).  So, a future improvement would be to do a more elaborate PING that confirmed that communications were in fact occurring.  However, this would impose constraints & requirements on the arduino sketch, which I did not want to do.  Suggestions are welcome....
+Also, the primitive arduino:is-open?  can be misleading.  Its return indicates whether the port is open (from the computer's perspective) and whether it has not been closed explicitly.  If you pull the USB connection to the arduino, this will not be detected (at least not immediately).  So, a future improvement would be to do a more elaborate (i.e., acknowledged) ping that confirmed that communications were in fact occurring.  However, this would impose constraints & requirements on the arduino sketch, which I did not want to do.  Suggestions are welcome....
 
 
 
