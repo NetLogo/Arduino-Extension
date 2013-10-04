@@ -36,6 +36,7 @@ The asynchronous nature of the board-to-computer communications has one notable 
 
 
 arduino:write-byte b
+
 show arduino:read "varname"
 
 
