@@ -237,6 +237,8 @@ public class ArduinoExtension extends DefaultClassManager {
 	
 	
 	
+	
+	
 	@Override
 	public void unload( ExtensionManager em) {
 		//first remove the event listener (if any) and close the port
