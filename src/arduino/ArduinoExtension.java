@@ -137,7 +137,6 @@ public class ArduinoExtension extends DefaultClassManager {
 	      return Syntax.reporterSyntax(Syntax.BooleanType());
 	    }
 		
-		
 		@Override
 		public Object report(Argument[] arg0, Context arg1)
 				throws ExtensionException, LogoException {
