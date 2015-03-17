@@ -133,6 +133,12 @@ public class ArduinoExtension extends DefaultClassManager {
 	
 	public static class IsOpen extends DefaultReporter {
 		@Override
+		public Syntax getSyntax() {
+	      return Syntax.reporterSyntax(Syntax.BooleanType());
+	    }
+		
+		
+		@Override
 		public Object report(Argument[] arg0, Context arg1)
 				throws ExtensionException, LogoException {
 			return (serialPort != null && serialPort.isOpened() && portListener != null);
