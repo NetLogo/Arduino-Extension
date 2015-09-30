@@ -1,5 +1,5 @@
-Arduino Extension for NetLogo 5.0.x
-===================================
+Arduino Extension for NetLogo
+=============================
 
 This extension provides 'no-frills' communication between NetLogo and a connected Arduino.  
 
@@ -8,7 +8,7 @@ It uses version 2.6.0 of the Java-Simple-Serial-Connector (JSSC) (https://code.g
 Contents
 --------
 
-In addition to the source, which expects to be compiled against a 5.0.x version of NetLogo and the JSSC library, this repo contains a ZIP file that can be unzipped and used without compilation.
+In addition to the source, which expects to be compiled against a 5x. version of NetLogo and the JSSC library, this repo contains a ZIP file that can be unzipped and used without compilation.
 
 The zip file also contains a sample NetLogo model and an Arduino Sketch that corresponds to it.  
 
@@ -17,27 +17,23 @@ To use
 
 For a first use without compiling code, do the following:
 
-1. Acquire the NetLogo software (5.0.4 is the latest version as of this writing).
+1. [Acquire the NetLogo software](http://ccl.northwestern.edu/netlogo/download.shtml). The Arduino extension comes pre-installed with NetLogo 5.2.1.
 
-2. Place the ZIP file from this repo into the extensions subfolder of your NetLogo installation
+2. Acquire an Arduino board and install the arduino IDE
 
-3. Unzip, resulting in a folder called "arduino" under extensions.
+3. Use the Arduino IDE to edit the Sketch (if desired) and send to the board. (See elaborate comments in the sketch for recommendations about what to comment out/leave in depending on your setup & circuit on the board.)
 
-4. Acquire an arduino board and install the arduino IDE
+4. Once the Arduino has the sketch loaded on it, it will run that sketch whenever it is powered on.
 
-5. Use the arduino IDE to edit the Sketch (if desired) and send to the board. (See elaborate comments in the sketch for recommendations about what to comment out/leave in depending on your setup & circuit on the board.)
+5. Open the test NetLogo model in this repo.
 
-6. Once the arduino has the sketch loaded on it, it will run that sketch whenever it is powered on.
+6. Connect the Arduino to a USB port on the computer if it is not still connected from step 3.
 
-7. Open the test NetLogo model in this repo.
+7. Press OPEN to choose the port to communicate with and establish the connection.
 
-8. Connect the arduino to a USB port on the computer if it is not still connected from step 5.
+8. Use the buttons to send byte commands; use the interface to inspect variable value(s) that your sketch is sending.
 
-9. Press OPEN to choose the port to communicate with and establish the connection.
-
-10. Use the buttons to send byte commands; use the interface to inspect variable value(s) that your sketch is sending.
-
-11. Note that by typing `arduino:primitives` you can get a list of the available commands in the extension.
+9. Note that by typing `arduino:primitives` you can get a list of the available commands in the extension.
 
 Notes
 -----
