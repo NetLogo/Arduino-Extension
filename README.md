@@ -5,6 +5,9 @@ This extension provides 'no-frills' communication between NetLogo and a connecte
 
 It uses version 2.6.0 of the Java-Simple-Serial-Connector (JSSC) (https://code.google.com/p/java-simple-serial-connector/w/list usb-to-serial library).  The extension offers simple write functionality from NetLogo to the board, as well as the ability to read data that has been sent from the board to the computer and stored in a lookup table of name-value pairs.
 
+Here is a list of the available primitives: [`arduino:primitives`](#arduinoprimitives), [`arduino:ports`](#arduinoports), [`arduino:open`](#arduinoopen), [`arduino:close`](#arduinoclose), [`arduino:get`](#arduinoget), [`arduino:write-string`](#arduinowrite-string), [`arduino:write-int`](#arduinowrite-int), [`arduino:write-byte`](#arduinowrite-byte), [`arduino:is-open?`](#arduinois-open).
+
+
 Contents
 --------
 
