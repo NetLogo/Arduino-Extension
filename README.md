@@ -45,7 +45,7 @@ The modeler is free to build as simple or as complex an application protocol on 
 The asynchronous nature of the board-to-computer communications has one notable limitation.  If you choose to try to simulate a synchronous, BLOCKING READ communications pattern, (e.g., by sending a byte-based signal to the board, which triggers a response in a known name-value pair), then you are likely to be 'off by one' response.  That is, if you do the following in NetLogo code:
 
     arduino:write-byte b
-    show arduino:read "varname"
+    show arduino:get "varname"
 
 You are likely to get the value of `varname` from the PRIOR command represented by writing the byte `b`.  This is because the second line of NetLogo code will execute while the Arduino is off generating a new value for `varname`.
 
@@ -64,3 +64,61 @@ Questions
 If you run into problems or have questions about the extension, please email me: cbrady@inquirelearning.com.
 
 I have tested early versions of this code on Windows, all versions on Mac.  And I WANT it to work across Mac, Win, and Linux.  So if you have troubles, please let me know.
+
+Primitives
+----------
+
+## arduino:primitives
+
+- `arduino:primitives`
+
+Reports a list of primitives available in the extension, with basic hints about their syntax. 
+
+## arduino:ports
+
+- `arduino:ports`
+
+Reports a list of port names.
+
+## arduino:open
+
+- <tt>arduino:open <i>port-name</i></tt>
+
+Opens the port named _port-name_.
+
+## arduino:close
+
+- `arduino:close`
+
+Closes the currently open port.
+
+## arduino:get
+
+- <tt>arduino:get <i>var-name</i></tt>
+
+Reads and reports the value associated with _var-name_ on the Arduino board. Note: _var-name_ is case insensitive.
+
+## arduino:write-string
+
+- <tt>arduino:write-string <i>string-message</i></tt>
+ 
+Writes a string message to the currently open port.
+
+## arduino:write-int
+
+- <tt>arduino:write-int <i>int-message</i></tt>
+
+Writes a integer message to the currently open port.
+
+## arduino:write-byte
+
+- <tt>arduino:write-byte <i>byte-message</i></tt>
+
+Writes a byte message to the currently open port.
+
+## arduino:is-open?
+
+- `arduino:is-open?`
+
+Reports a boolean value (`true` or `false`) indicating if a port is open. 
+
