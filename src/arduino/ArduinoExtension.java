@@ -276,9 +276,9 @@ public class ArduinoExtension extends DefaultClassManager {
 			field.setAccessible(true);
 			@SuppressWarnings("unchecked")
 			Vector<Object> libs = (Vector<Object>) (field.get(classLoader)) ;
-			for ( Object o : libs ) 
+			for ( Object o : libs )
 			{
-				java.lang.reflect.Method finalize = o.getClass().getDeclaredMethod( "finalize" , new Class[0] ) ;
+				java.lang.reflect.Method finalize = o.getClass().getDeclaredMethod( "finalize" , new Class<?>[0] ) ;
 				finalize.setAccessible( true ) ;
 				finalize.invoke( o , new Object[0] ) ;
 			}
@@ -288,6 +288,5 @@ public class ArduinoExtension extends DefaultClassManager {
 			System.err.println( e.getMessage() ) ;
 		}
 	}
-	
 
 }
