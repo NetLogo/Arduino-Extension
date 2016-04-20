@@ -19,4 +19,4 @@ netLogoClassManager := "arduino.ArduinoExtension"
 netLogoTarget :=
   org.nlogo.build.NetLogoExtension.directoryTarget(baseDirectory.value)
 
-netLogoVersion := "6.0.0-M2"
+netLogoVersion := "6.0.0-M5"
