@@ -1,6 +1,6 @@
 scalaVersion := "2.11.7"
 
-enablePlugins(org.nlogo.build.NetLogoExtension)
+enablePlugins(org.nlogo.build.NetLogoExtension, org.nlogo.build.ExtensionDocumentationPlugin)
 
 javaSource in Compile := baseDirectory.value / "src"
 
