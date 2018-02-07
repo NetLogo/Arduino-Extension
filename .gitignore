@@ -5,3 +5,4 @@ classes
 /arduino.zip*
 /jss*.jar
 /target
+.bundledFiles
