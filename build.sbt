@@ -1,4 +1,4 @@
-scalaVersion := "2.12.0"
+scalaVersion := "2.12.4"
 
 enablePlugins(org.nlogo.build.NetLogoExtension, org.nlogo.build.ExtensionDocumentationPlugin)
 
@@ -19,4 +19,4 @@ netLogoClassManager := "arduino.ArduinoExtension"
 netLogoTarget :=
   org.nlogo.build.NetLogoExtension.directoryTarget(baseDirectory.value)
 
-netLogoVersion := "6.0.2-M1"
+netLogoVersion := "6.0.2"

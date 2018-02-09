@@ -1,6 +1,8 @@
 package arduino;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Vector;
 
 import jssc.SerialPort;
@@ -27,31 +29,27 @@ public class ArduinoExtension extends DefaultClassManager {
 	static PortListener portListener;
 	static int BAUD_RATE = 9600;
 
-	static public HashMap<String,Double> values = new HashMap<String,Double>();
-	static {
-		values.put("BaudRate", (double) BAUD_RATE);
-	}
+	public Map<String,Object> values =
+    Collections.<String,Object>synchronizedMap(new HashMap<String,Object>());
 
-	static public double get(String key) {
-		String lcKey = key.toLowerCase();
-		if ( values.containsKey( lcKey ) )  {
-			return values.get(lcKey);
-		} else {
-			return Double.NaN;
-		}
+  public ArduinoExtension() {
+    super();
+		values.put("BaudRate", (double) BAUD_RATE);
 	}
 
 	@Override
 	public void load(PrimitiveManager pm) throws ExtensionException {
 		pm.addPrimitive("primitives", new Primitives());
 		pm.addPrimitive("ports", new Ports() );
-		pm.addPrimitive("open", new Open() );
+		pm.addPrimitive("open", new Open(values) );
 		pm.addPrimitive("close", new Close() );
-		pm.addPrimitive("get", new Get() );
+		pm.addPrimitive("get", new Get(values) );
 		pm.addPrimitive("write-string", new WriteString() );
 		pm.addPrimitive("write-int", new WriteInt() );
 		pm.addPrimitive("write-byte", new WriteByte() );
 		pm.addPrimitive("is-open?", new IsOpen());
+    pm.addPrimitive("debug-to-arduino", new DebugToArduino());
+    pm.addPrimitive("debug-from-arduino", new DebugFromArduino());
 	}
 
 
@@ -103,11 +101,17 @@ public class ArduinoExtension extends DefaultClassManager {
 
 
 	public static class Open implements Command {
+    private Map<String, Object> values;
+
+    public Open(Map<String, Object> values) {
+      this.values = values;
+    }
 
 		@Override
 		public Syntax getSyntax() {
 			return SyntaxJ.commandSyntax(new int[] {Syntax.StringType() });
 		}
+
 		@Override
 		public void perform(Argument[] args, Context ctxt)
 				throws ExtensionException, LogoException {
@@ -121,7 +125,7 @@ public class ArduinoExtension extends DefaultClassManager {
 					serialPort.setParams(BAUD_RATE, 8, 1, 0);
 		            int mask = SerialPort.MASK_RXCHAR + SerialPort.MASK_CTS + SerialPort.MASK_DSR;//Prepare mask
 		            serialPort.setEventsMask(mask); //Set mask
-					portListener = new PortListener( serialPort );
+					portListener = new PortListener(serialPort, values);
 					serialPort.addEventListener(portListener);
 				} catch (SerialPortException e) {
 					throw new ExtensionException("Error in opening port: " + e.getMessage());
@@ -174,9 +178,16 @@ public class ArduinoExtension extends DefaultClassManager {
 
 
 	public static class Get implements Reporter {
+    private Map<String, Object> values;
+
+    public Get(Map<String, Object> values) {
+      this.values = values;
+    }
+
 		@Override
 		public Syntax getSyntax() {
-	      return SyntaxJ.reporterSyntax(new int[] {Syntax.StringType()}, Syntax.NumberType());
+	      return SyntaxJ.reporterSyntax(new int[] {Syntax.StringType()},
+            Syntax.StringType() | Syntax.BooleanType() | Syntax.NumberType());
 	    }
 
 		@Override
@@ -184,6 +195,15 @@ public class ArduinoExtension extends DefaultClassManager {
 				throws ExtensionException, LogoException {
 			return get(args[0].getString());
 		}
+
+    public Object get(String key) {
+      String lcKey = key.toLowerCase();
+      if (values.containsKey(lcKey))  {
+        return values.get(lcKey);
+      } else {
+        return Boolean.FALSE;
+      }
+    }
 	}
 
 	public static class WriteString implements Command {
@@ -288,4 +308,34 @@ public class ArduinoExtension extends DefaultClassManager {
 		}
 	}
 
+
+	public static class DebugToArduino implements Reporter {
+		@Override
+    public Syntax getSyntax() {
+      return SyntaxJ.reporterSyntax(Syntax.ListType());
+    }
+
+    @Override
+    public Object report(Argument[] arg0, Context arg1)
+      throws ExtensionException, LogoException {
+			LogoListBuilder llist = new LogoListBuilder();
+
+      return llist.toLogoList();
+    }
+  }
+
+	public static class DebugFromArduino implements Reporter {
+    @Override
+    public Syntax getSyntax() {
+      return SyntaxJ.reporterSyntax(Syntax.ListType());
+    }
+
+    @Override
+    public Object report(Argument[] arg0, Context arg1)
+      throws ExtensionException, LogoException {
+      LogoListBuilder llist = new LogoListBuilder();
+
+      return llist.toLogoList();
+    }
+  }
 }
