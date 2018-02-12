@@ -2,8 +2,6 @@ scalaVersion := "2.12.4"
 
 enablePlugins(org.nlogo.build.NetLogoExtension, org.nlogo.build.ExtensionDocumentationPlugin)
 
-javaSource in Compile := baseDirectory.value / "src"
-
 name := "arduino"
 
 scalacOptions ++= Seq("-deprecation", "-unchecked", "-Xlint", "-Xfatal-warnings",
@@ -20,3 +18,4 @@ netLogoTarget :=
   org.nlogo.build.NetLogoExtension.directoryTarget(baseDirectory.value)
 
 netLogoVersion := "6.0.2"
+
