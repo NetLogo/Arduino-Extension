@@ -10,6 +10,10 @@ scalacOptions ++= Seq("-deprecation", "-unchecked", "-Xlint", "-Xfatal-warnings"
 javacOptions ++= Seq("-g", "-deprecation", "-Xlint:all", "-Xlint:-serial", "-Xlint:-path",
   "-encoding", "us-ascii")
 
+libraryDependencies ++= Seq(
+  "org.scalatest"  %% "scalatest"  % "3.0.1"  % "test"
+)
+
 netLogoZipSources   := false
 
 netLogoClassManager := "arduino.ArduinoExtension"
