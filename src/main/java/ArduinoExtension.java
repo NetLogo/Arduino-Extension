@@ -1,9 +1,13 @@
 package arduino;
 
 import java.util.Collections;
+import java.util.Deque;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Vector;
+import java.util.LinkedList;
+import java.util.concurrent.LinkedBlockingDeque;
 
 import jssc.SerialPort;
 import jssc.SerialPortException;
@@ -28,9 +32,14 @@ public class ArduinoExtension extends DefaultClassManager {
 	static SerialPort serialPort;
 	static PortListener portListener;
 	static int BAUD_RATE = 9600;
+  static int KEPT_MESSAGES_COUNT = 5;
 
 	public Map<String,Object> values =
     Collections.<String,Object>synchronizedMap(new HashMap<String,Object>());
+
+  public Deque<ErrorRecord> inboundErrors = new LinkedBlockingDeque<ErrorRecord>();
+
+  public LinkedList<String> outboundMessages = new LinkedList<String>();
 
   public ArduinoExtension() {
     super();
@@ -40,19 +49,24 @@ public class ArduinoExtension extends DefaultClassManager {
 	@Override
 	public void load(PrimitiveManager pm) throws ExtensionException {
 		pm.addPrimitive("primitives", new Primitives());
-		pm.addPrimitive("ports", new Ports() );
-		pm.addPrimitive("open", new Open(values) );
-		pm.addPrimitive("close", new Close() );
-		pm.addPrimitive("get", new Get(values) );
-		pm.addPrimitive("write-string", new WriteString() );
-		pm.addPrimitive("write-int", new WriteInt() );
-		pm.addPrimitive("write-byte", new WriteByte() );
+		pm.addPrimitive("ports", new Ports());
+		pm.addPrimitive("open", new Open(values, inboundErrors));
+		pm.addPrimitive("close", new Close());
+		pm.addPrimitive("get", new Get(values));
+		pm.addPrimitive("write-string", new WriteString(outboundMessages));
+		pm.addPrimitive("write-int", new WriteInt(outboundMessages));
+		pm.addPrimitive("write-byte", new WriteByte(outboundMessages));
 		pm.addPrimitive("is-open?", new IsOpen());
-    pm.addPrimitive("debug-to-arduino", new DebugToArduino());
-    pm.addPrimitive("debug-from-arduino", new DebugFromArduino());
+    pm.addPrimitive("debug-to-arduino", new DebugToArduino(outboundMessages));
+    pm.addPrimitive("debug-from-arduino", new DebugFromArduino(inboundErrors));
 	}
 
-
+  static void addMessage(LinkedList<String> messages, String messageType, String messageValue) {
+    while (messages.size() >= 5) {
+      messages.removeLast();
+    }
+    messages.addFirst(messageType + ":" + messageValue);
+  }
 
 	public static class Primitives implements Reporter {
 		@Override
@@ -65,8 +79,12 @@ public class ArduinoExtension extends DefaultClassManager {
 				throws ExtensionException, LogoException {
 
 			LogoListBuilder llist = new LogoListBuilder();
-			String[] prims = {"reporter:primitives", "reporter:ports",
-					"reporter:get[Name:String(case-insensitive)]", "reporter:is-open?",
+			String[] prims = {"reporter:primitives",
+          "reporter:ports",
+					"reporter:get[Name:String(case-insensitive)]",
+          "reporter:is-open?",
+          "reporter:debug-to-arduino",
+          "reporter:debug-from-arduino",
 					"",
 					"command:open[Port:String]", "command:close",
 					"command:write-string[Message:String]",
@@ -102,9 +120,11 @@ public class ArduinoExtension extends DefaultClassManager {
 
 	public static class Open implements Command {
     private Map<String, Object> values;
+    private Deque<ErrorRecord> inboundErrors;
 
-    public Open(Map<String, Object> values) {
+    public Open(Map<String, Object> values, Deque<ErrorRecord> inboundErrors) {
       this.values = values;
+      this.inboundErrors = inboundErrors;
     }
 
 		@Override
@@ -125,7 +145,7 @@ public class ArduinoExtension extends DefaultClassManager {
 					serialPort.setParams(BAUD_RATE, 8, 1, 0);
 		            int mask = SerialPort.MASK_RXCHAR + SerialPort.MASK_CTS + SerialPort.MASK_DSR;//Prepare mask
 		            serialPort.setEventsMask(mask); //Set mask
-					portListener = new PortListener(serialPort, values);
+					portListener = new PortListener(serialPort, values, inboundErrors);
 					serialPort.addEventListener(portListener);
 				} catch (SerialPortException e) {
 					throw new ExtensionException("Error in opening port: " + e.getMessage());
@@ -207,6 +227,12 @@ public class ArduinoExtension extends DefaultClassManager {
 	}
 
 	public static class WriteString implements Command {
+    final private LinkedList<String> outboundMessages;
+
+    public WriteString(LinkedList<String> outboundMessages) {
+      this.outboundMessages = outboundMessages;
+    }
+
 		@Override
 		public Syntax getSyntax() {
 			return SyntaxJ.commandSyntax(new int[] {Syntax.StringType() });
@@ -218,7 +244,9 @@ public class ArduinoExtension extends DefaultClassManager {
 				throw new ExtensionException( "Serial Port not Open");
 			}
 			try {
-				serialPort.writeString(args[0].getString());
+        String arg = args[0].getString();
+				serialPort.writeString(arg);
+        addMessage(outboundMessages, "s", arg);
 			} catch (SerialPortException e) {
 				throw new ExtensionException( "Error in writing: " + e.getMessage() );
 			}
@@ -226,6 +254,12 @@ public class ArduinoExtension extends DefaultClassManager {
 	}
 
 	public static class WriteInt implements Command {
+    final private LinkedList<String> outboundMessages;
+
+    public WriteInt(LinkedList<String> outboundMessages) {
+      this.outboundMessages = outboundMessages;
+    }
+
 		@Override
 		public Syntax getSyntax() {
 			return SyntaxJ.commandSyntax(new int[] {Syntax.NumberType() });
@@ -237,7 +271,9 @@ public class ArduinoExtension extends DefaultClassManager {
 				throw new ExtensionException( "Serial Port not Open");
 			}
 			try {
-				serialPort.writeInt(args[0].getIntValue());
+        int arg = args[0].getIntValue();
+				serialPort.writeInt(arg);
+        addMessage(outboundMessages, "i", Integer.toString(arg));
 			} catch (SerialPortException e) {
 				throw new ExtensionException( "Error in writing: " + e.getMessage() );
 			}
@@ -245,6 +281,12 @@ public class ArduinoExtension extends DefaultClassManager {
 	}
 
 	public static class WriteByte implements Command {
+    final private LinkedList<String> outboundMessages;
+
+    public WriteByte(LinkedList<String> outboundMessages) {
+      this.outboundMessages = outboundMessages;
+    }
+
 		@Override
 		public Syntax getSyntax() {
 			return SyntaxJ.commandSyntax(new int[] {Syntax.NumberType() });
@@ -256,7 +298,9 @@ public class ArduinoExtension extends DefaultClassManager {
 				throw new ExtensionException( "Serial Port not Open");
 			}
 			try {
-				serialPort.writeByte((byte)(args[0].getIntValue()));
+        byte arg = (byte) args[0].getIntValue();
+				serialPort.writeByte(arg);
+        addMessage(outboundMessages, "b", Integer.toString((int) arg));
 			} catch (SerialPortException e) {
 				throw new ExtensionException( "Error in writing: " + e.getMessage() );
 			}
@@ -309,7 +353,13 @@ public class ArduinoExtension extends DefaultClassManager {
 	}
 
 
-	public static class DebugToArduino implements Reporter {
+	public static class DebugFromArduino implements Reporter {
+    final private Deque<ErrorRecord> inboundErrors;
+
+    public DebugFromArduino(Deque<ErrorRecord> inboundErrors) {
+      this.inboundErrors = inboundErrors;
+    }
+
 		@Override
     public Syntax getSyntax() {
       return SyntaxJ.reporterSyntax(Syntax.ListType());
@@ -320,11 +370,30 @@ public class ArduinoExtension extends DefaultClassManager {
       throws ExtensionException, LogoException {
 			LogoListBuilder llist = new LogoListBuilder();
 
+      Iterator<ErrorRecord> iter = inboundErrors.iterator();
+
+      while (iter.hasNext()) {
+        LogoListBuilder itemBuilder = new LogoListBuilder();
+        ErrorRecord record = iter.next();
+        itemBuilder.add(record.inboundString());
+        itemBuilder.add(record.errorDescription());
+        if (record.exception().nonEmpty()) {
+          itemBuilder.add(record.exception().get().getMessage());
+        }
+        llist.add(itemBuilder.toLogoList());
+      }
+
       return llist.toLogoList();
     }
   }
 
-	public static class DebugFromArduino implements Reporter {
+	public static class DebugToArduino implements Reporter {
+    final private LinkedList<String> outboundMessages;
+
+    public DebugToArduino(LinkedList<String> outboundMessages) {
+      this.outboundMessages = outboundMessages;
+    }
+
     @Override
     public Syntax getSyntax() {
       return SyntaxJ.reporterSyntax(Syntax.ListType());
@@ -334,6 +403,12 @@ public class ArduinoExtension extends DefaultClassManager {
     public Object report(Argument[] arg0, Context arg1)
       throws ExtensionException, LogoException {
       LogoListBuilder llist = new LogoListBuilder();
+
+      Iterator<String> iter = outboundMessages.iterator();
+
+      while(iter.hasNext()) {
+        llist.add(iter.next());
+      }
 
       return llist.toLogoList();
     }
