@@ -2,6 +2,10 @@ scalaVersion := "2.12.4"
 
 enablePlugins(org.nlogo.build.NetLogoExtension, org.nlogo.build.ExtensionDocumentationPlugin)
 
+version := "3.0.0"
+
+isSnapshot := true
+
 name := "arduino"
 
 scalacOptions ++= Seq("-deprecation", "-unchecked", "-Xlint", "-Xfatal-warnings",
