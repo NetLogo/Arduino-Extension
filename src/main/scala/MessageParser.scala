@@ -39,11 +39,11 @@ object MessageParser {
           Left(ErrorRecord(entry, "Arduino values must have three comma-separated fields", None))
       }
 
-    valueField.map(content => (fields(0).toLowerCase, fields(1).toUpperCase.head, content))
+    valueField.map(content => (fields(0).toLowerCase, fields(1).toUpperCase.headOption, content))
       .flatMap {
-        case (name, 'S', rawValue) =>
+        case (name, Some('S'), rawValue) =>
           Right(ValuePair(name, rawValue))
-        case (name, 'D', rawValue) =>
+        case (name, Some('D'), rawValue) =>
           Try(rawValue.toDouble)
             .fold(
             {
@@ -51,8 +51,8 @@ object MessageParser {
               case t: Throwable => throw t
             },
             d => Right(ValuePair(name, Double.box(d))))
-              case (name, tpe, rawValue) =>
-                Left(ErrorRecord(entry, s"Unknown type '$tpe' for value '$name'", None))
+         case (name, tpe, rawValue) =>
+           Left(ErrorRecord(entry, s"Unknown type '${tpe.getOrElse("")}' for value '$name'", None))
       }
   }
 }

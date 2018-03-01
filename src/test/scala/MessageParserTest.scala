@@ -39,6 +39,11 @@ class MessageParserTest extends FunSuite with Inside {
       MessageParser.parseStream(";;;"))
   }
 
+  test("does not raise exception when passed a message with a blank type field") {
+    assertResult(("", Seq(Left(ErrorRecord("abc,,1", "Unknown type '' for value 'abc'", None)))))(
+      MessageParser.parseStream("abc,,1;"))
+  }
+
   test("parseEntry parses a string") {
     assertValid("abc", "def", "abc,s,def")
     assertValid("abc", "def", "ABC,S,def")
