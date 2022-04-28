@@ -1,8 +1,9 @@
 package arduino
 
-import org.scalatest.{ FunSuite, Inside }
+import org.scalatest.Inside
+import org.scalatest.funsuite.AnyFunSuite
 
-class MessageParserTest extends FunSuite with Inside {
+class MessageParserTest extends AnyFunSuite with Inside {
   testInvalidFieldCount("")
   testInvalidFieldCount("abc,")
   testInvalidFieldCount("abc,s,def,bar")
@@ -87,4 +88,3 @@ class MessageParserTest extends FunSuite with Inside {
     }
   }
 }
-
