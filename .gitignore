@@ -1,8 +1,5 @@
-classes
-/project/project
-/project/target
-/arduino.jar*
-/arduino.zip*
-/jss*.jar
-/target
 .bundledFiles
+target/
+extensions/
+/*.jar
+/*.zip
