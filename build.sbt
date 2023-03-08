@@ -11,6 +11,6 @@ scalacOptions ++= Seq("-deprecation", "-unchecked", "-Xlint", "-Xfatal-warnings"
 
 javacOptions ++= Seq("-g", "-deprecation", "-Xlint:all", "-Xlint:-serial", "-Xlint:-path", "-encoding", "us-ascii", "--release", "11")
 
-netLogoVersion := "6.2.2"
+netLogoVersion := "6.3.0"
 netLogoClassManager := "arduino.ArduinoExtension"
 netLogoPackageExtras += (baseDirectory.value / "lib" / "jssc-2.6.0.jar" -> None)
